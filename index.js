@@ -1,10 +1,20 @@
 const http = require("http");
 const url = require("url");
-const { signMyJWT } = require("./myOwnJWT");
-const { ApiError } = require("./utils/ApiError");
-const { responseHandler } = require("./utils/responseHandler");
-const { errorHandler } = require("./utils/errorHandler");
-const { comparePasswords } = require("./utils/bcryptEquivalent");
+const { signMyJWT } = require("./utils/jwtEquivalent.js");
+const { ApiError } = require("./utils/ApiError.js");
+const { responseHandler } = require("./utils/responseHandler.js");
+const { errorHandler } = require("./utils/errorHandler.js");
+const {
+  comparePasswords,
+  generateHash,
+} = require("./utils/bcryptEquivalent.js");
+const { connect, db } = require("./db");
+
+const profiles = db.collection("profiles");
+
+(async () => {
+  await connect();
+})(); // connect to mongoDb
 
 // Router
 const router = {
@@ -37,6 +47,7 @@ const server = http.createServer((req, res) => {
        *
        */
     } catch (error) {
+      console.log(error.message);
       // Handle caught errors
       error instanceof ApiError
         ? errorHandler(res, error.statusCode, error.message)
@@ -68,7 +79,8 @@ async function authenticate(req, res, data, queryParams) {
    * Carry out main processing
    *
    */
-  const userProfile = await db.profiles.findOne({ email });
+
+  const userProfile = await profiles.findOne({ username });
 
   // Check if the user exists
   if (!userProfile) {
@@ -80,7 +92,7 @@ async function authenticate(req, res, data, queryParams) {
 
   // Custom bcrypt.compare equivalent function
   const isPasswordCorrect = await comparePasswords(
-    receivedPassword,
+    password,
     userProfile.password
   );
 
@@ -89,16 +101,67 @@ async function authenticate(req, res, data, queryParams) {
   }
 
   // Extract Permissions
-  const agentPermissions = userProfile.agents.filter(
-    (agent) => agent._id === agentId
+  const agent = userProfile.agents.find(
+    (agent) => agent._id.toHexString() === agentId
   );
 
-  const access_token = signMyJWT(agentPermissions, "useDotEnvHere");
-  return responseHandler(res, 200, { access_token });
+  const access_token = signMyJWT(agent.permissions, process.env.JWT);
+  return responseHandler(
+    res,
+    200,
+    { access_token },
+    "Successfully created access_token!"
+  );
   /*
    *
    *
    */
+}
+
+async function register(req, res, data, queryParams) {
+  /*
+   *
+   * Endpoint for user registration
+   *
+   */
+
+  // Guard Rail
+  if (req.method !== "POST") {
+    throw new ApiError(405, "Method not allowed!");
+  }
+
+  // Return if request doesn't contain required data
+  const { username, name, password, email } = data;
+
+  if (!username || !name || !email || !password) {
+    throw new ApiError(409, "Some data's missing!");
+  }
+
+  /*
+   * Carry out main processing
+   *
+   */
+
+  // Check if user already exists
+  const existingProfile = await profiles.findOne({ email });
+
+  if (existingProfile) {
+    throw new ApiError(409, "Already registered, consider signing in!");
+  }
+
+  const hashedPassword = await generateHash(password);
+
+  const newProfile = {
+    username,
+    name,
+    email,
+    password: hashedPassword,
+  };
+
+  // Save it in the database
+  profiles.insertOne(newProfile);
+
+  return responseHandler(res, 200);
 }
 
 // Start server
