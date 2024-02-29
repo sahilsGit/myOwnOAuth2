@@ -10,6 +10,7 @@ const {
   authenticateSession,
   changeSessionPermissions,
 } = require("./api/session.controllers.js");
+const { getUserDetails } = require("./api/resource.controllers.js");
 
 // Connect to mongoDb
 (async () => {
@@ -25,6 +26,8 @@ const router = {
   "/api/user/login": loginUser,
   "/api/agent/register": registerAgent,
   "/api/agent/login": loginAgent,
+  // Resource specific endpoints
+  "/api/resource/getUserBasics": getUserDetails,
 };
 
 // Create HTTP server

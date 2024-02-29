@@ -7,11 +7,25 @@ const { responseHandler } = require("../utils/responseHandler");
 const agents = db.collection("agents");
 const { randomBytes } = require("crypto");
 
+/*
+ * Agent Specific APIs,
+ *
+ * Agents are parties/services that gain access
+ * to users account using the temporary access_token.
+ *
+ * Users as the owners of their accounts
+ * Authenticate => Permit => Allow account access to these agents
+ * via access_tokens
+ *
+ *
+ * Agents must register themselves with the system, which grants
+ * them an "agentUiD", that is used to manage the OAuth equivalent session.
+ */
+
 async function registerAgent(req, res, data) {
   /*
    *
-   *
-   * Endpoint for agent signup
+   * Endpoint for agent registration
    */
 
   // Guard Rail

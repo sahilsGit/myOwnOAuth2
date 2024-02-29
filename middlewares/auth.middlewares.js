@@ -8,7 +8,7 @@ async function verifyToken(req) {
     const authHeader = req.headers["authorization"];
 
     if (!authHeader) {
-      throw new ApiError(401, "Login_token is required!");
+      throw new ApiError(401, "Token is required!");
     }
 
     // Extract the access_token out of the auth header
@@ -17,6 +17,7 @@ async function verifyToken(req) {
     // Verify access_token
     const decoded = verifyMyJWT(login_token, process.env.JWT);
 
+    console.log(decoded);
     // Return payload
     return decoded;
   } catch (error) {

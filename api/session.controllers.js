@@ -7,11 +7,22 @@ const { responseHandler } = require("../utils/responseHandler");
 const { errorHandler } = require("../utils/errorHandler");
 const profiles = db.collection("profiles");
 
+/*
+ * Session Specific APIs,
+ *
+ * By 'Sessions' I mean users authenticating and permitting
+ * agents to query the resource server on their behalf by
+ * issuing them a temporary access_token
+ *
+ * These tokens are temporary and are not refreshed automatically -
+ * Agents have access only till the current token expires,
+ * unless "automatic-refresh" is turned on.
+ */
+
 async function createSession(req, res, data) {
   /*
-   *
-   *
-   * Endpoint for user authentication
+   * Endpoint to create session
+   * That is - signing up with an agent for the first time
    */
 
   try {
@@ -60,7 +71,7 @@ async function createSession(req, res, data) {
 
     // Sign my custom-made JWT equivalent token
     const access_token = signMyJWT(
-      { permissions: agentObjectToAppend.permissions },
+      { permissions: agentObjectToAppend.permissions, username: username },
       process.env.JWT
     );
 
@@ -85,9 +96,9 @@ async function createSession(req, res, data) {
 
 async function authenticateSession(req, res) {
   /*
-   *
-   *
-   * Endpoint for user authentication
+   * Endpoint to re-authenticate,
+   * For providing the agent a new temporary access_token
+   * Manually.
    */
 
   // Extract query params
@@ -115,7 +126,7 @@ async function authenticateSession(req, res) {
 
     // Sign my custom-made JWT equivalent token
     const access_token = signMyJWT(
-      { permissions: agent.permissions },
+      { permissions: agent.permissions, username: username },
       process.env.JWT
     );
 
@@ -140,9 +151,12 @@ async function authenticateSession(req, res) {
 
 async function changeSessionPermissions(req, res, data) {
   /*
+   * Endpoint for editing agent-permissions
+   * This takes effect with the issue of new access_token.
    *
-   *
-   * Endpoint for editing permissions
+   * Any access_token issued before the permission change will remain
+   * valid till it expires, for immediate effect all the old tokens
+   * must be invalidated.
    */
 
   // Extract data & params

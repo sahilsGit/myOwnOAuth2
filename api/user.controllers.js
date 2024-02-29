@@ -6,6 +6,16 @@ const { signMyJWT } = require("../utils/jwtEquivalent");
 const { responseHandler } = require("../utils/responseHandler");
 const profiles = db.collection("profiles");
 
+/*
+ * User Specific APIs,
+ *
+ * By 'Users' I mean individuals or parties that permit the "agents"
+ * to query the resource server other their behalf.
+ *
+ * User's need to register themselves with the centralized auth server
+ * Before they can issue the temporary access_token
+ */
+
 async function registerUser(req, res, data) {
   /*
    *
