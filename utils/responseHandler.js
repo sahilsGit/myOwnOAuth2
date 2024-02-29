@@ -1,3 +1,5 @@
+// Customer response handler
+
 const responseHandler = (
   res,
   statusCode = 200,

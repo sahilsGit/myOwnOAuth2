@@ -1,3 +1,4 @@
+// Custom error handler
 const errorHandler = (
   res,
   statusCode = 500,
