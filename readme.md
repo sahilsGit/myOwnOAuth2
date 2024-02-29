@@ -32,7 +32,7 @@ It replicates core OAuth concepts and actors like:
 - Access_token: Agents use to access protected resources
 - Permissions: Users grants to Agents/Clients with respect to their resources
 
-## How it works
+## How does it work
 
 ### Access Request & Authorization
 
@@ -54,3 +54,7 @@ Authenticated users can change the permissions given to agents at any time. All 
 
 Updated permissions get embedded in the new access token thereafter.
 Unexpired old tokens will still remain valid until expiration unless invalidated manually.
+
+<p align="center">
+  <img src="./authFlow.png" alt="Authentication Flow Diagram"/>
+</p>
