@@ -1,6 +1,4 @@
-# What is it?
-
-A simplified OAuth 2.0 flow implementation from scratch without hitting `npm install`.
+# A simplified OAuth 2.0 implementation - without hitting `npm install`.
 
 This is a part of my [_**"Building stuff in Vanilla NodeJS without installing any external packages"**_](https://x.com/sahil_singh37/status/1759523537402868217?s=20) challenge where I try to build non-trivial stuff using raw NodeJS, nothing else.
 
